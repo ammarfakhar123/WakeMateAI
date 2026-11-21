@@ -2,6 +2,7 @@ package com.wakemate.ai.ui.screens.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -241,14 +243,20 @@ fun HomeScreen(
                             label = "progress"
                         )
 
-                        CircularProgressIndicator(
-                            progress = animatedPercent,
-                            modifier = Modifier.fillMaxSize(),
-                            color = NeonCyan,
-                            trackColor = DarkCardBorder,
-                            strokeWidth = 7.dp,
-                            strokeCap = StrokeCap.Round
-                        )
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            val stroke = Stroke(width = 7.dp.toPx(), cap = StrokeCap.Round)
+                            drawCircle(
+                                color = DarkCardBorder,
+                                style = stroke
+                            )
+                            drawArc(
+                                color = NeonCyan,
+                                startAngle = -90f,
+                                sweepAngle = 360f * animatedPercent,
+                                useCenter = false,
+                                style = stroke
+                            )
+                        }
 
                         Text(
                             text = "${state.completedPercentage}%",

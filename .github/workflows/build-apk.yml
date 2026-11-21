@@ -42,9 +42,9 @@ jobs:
       - name: Create Release with Direct APK Download
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "WakeMate AI v1.0.0 (Direct APK)"
-          body: "Download `app-debug.apk` directly on your Android phone and tap to install!"
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "WakeMate AI (Direct APK Download)"
+          body: "Click on `app-debug.apk` below under Assets to download directly to your Android phone!"
           files: app/build/outputs/apk/debug/app-debug.apk
           draft: false
           prerelease: false
