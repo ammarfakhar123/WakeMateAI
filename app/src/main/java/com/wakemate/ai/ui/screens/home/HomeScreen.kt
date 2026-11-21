@@ -242,7 +242,7 @@ fun HomeScreen(
                         )
 
                         CircularProgressIndicator(
-                            progress = { animatedPercent },
+                            progress = animatedPercent,
                             modifier = Modifier.fillMaxSize(),
                             color = NeonCyan,
                             trackColor = DarkCardBorder,

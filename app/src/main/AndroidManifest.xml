@@ -70,7 +70,7 @@
             android:name=".service.AlarmService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="specialUse|mediaPlayback">
+            android:foregroundServiceType="mediaPlayback">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Smart alarm audio playback and vibration wake lock" />
@@ -81,7 +81,7 @@
             android:name=".service.ChargingChallengeService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="specialUse|mediaPlayback">
+            android:foregroundServiceType="mediaPlayback">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Continuous wake-up charging challenge alarm until power plugged" />
