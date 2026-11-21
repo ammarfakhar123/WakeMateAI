@@ -78,7 +78,7 @@ fun TaskScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    TaskFilter.values().forEach { filter ->
+                    listOf(TaskFilter.ALL, TaskFilter.PENDING, TaskFilter.COMPLETED).forEach { filter ->
                         val isSelected = selectedFilter == filter
                         Surface(
                             modifier = Modifier
