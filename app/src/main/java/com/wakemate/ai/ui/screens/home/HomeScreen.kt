@@ -243,20 +243,14 @@ fun HomeScreen(
                             label = "progress"
                         )
 
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            val stroke = Stroke(width = 7.dp.toPx(), cap = StrokeCap.Round)
-                            drawCircle(
-                                color = DarkCardBorder,
-                                style = stroke
-                            )
-                            drawArc(
-                                color = NeonCyan,
-                                startAngle = -90f,
-                                sweepAngle = 360f * animatedPercent,
-                                useCenter = false,
-                                style = stroke
-                            )
-                        }
+                        CircularProgressIndicator(
+                            progress = { animatedPercent },
+                            modifier = Modifier.fillMaxSize(),
+                            color = NeonCyan,
+                            trackColor = DarkCardBorder,
+                            strokeWidth = 7.dp,
+                            strokeCap = StrokeCap.Round
+                        )
 
                         Text(
                             text = "${state.completedPercentage}%",
