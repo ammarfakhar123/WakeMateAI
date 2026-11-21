@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">WakeMate AI</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_alarms">Alarms</string>
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="alarm_ringing_title">Wake Up!</string>
+    <string name="snooze">Snooze (10m)</string>
+    <string name="stop_alarm">Stop Alarm</string>
+
+    <string name="charging_challenge_title">Charging Challenge 🔌</string>
+    <string name="charging_challenge_instruction">Wake up! Connect your phone to the charger to stop this alarm!</string>
+    <string name="charging_detected">Charger Connected! You are awake! ⚡</string>
+
+    <string name="wakeup_verification_title">Hey! Are you awake? 😴</string>
+    <string name="wakeup_verification_body">Tap to confirm or reply to your personal assistant.</string>
+    <string name="quick_reply_awake">Yes, I\'m awake ✅</string>
+    <string name="quick_reply_sleepy">No, still sleepy 😴</string>
+
+    <string name="task_reminder_title">Task Reminder 💻</string>
+    <string name="mark_completed">Mark Done ✅</string>
+</resources>
