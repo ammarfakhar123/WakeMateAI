@@ -32,14 +32,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        checkAndRequestPermissions()
+        try {
+            checkAndRequestPermissions()
+        } catch (e: Throwable) {
+            android.util.Log.e("MainActivity", "Failed to check permissions", e)
+        }
 
-        val initialDestination = when (intent?.getStringExtra("NAVIGATE_TO")) {
-            "chat" -> Screen.Chat.route
-            "tasks" -> Screen.Tasks.route
-            "alarms" -> Screen.Alarms.route
-            "settings" -> Screen.Settings.route
-            else -> Screen.Home.route
+        val initialDestination = try {
+            when (intent?.getStringExtra("NAVIGATE_TO")) {
+                "chat" -> Screen.Chat.route
+                "tasks" -> Screen.Tasks.route
+                "alarms" -> Screen.Alarms.route
+                "settings" -> Screen.Settings.route
+                else -> Screen.Home.route
+            }
+        } catch (e: Throwable) {
+            Screen.Home.route
         }
 
         setContent {

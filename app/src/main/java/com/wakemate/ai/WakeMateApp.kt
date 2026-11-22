@@ -1,6 +1,7 @@
 package com.wakemate.ai
 
 import android.app.Application
+import android.util.Log
 import com.wakemate.ai.data.local.WakeMateDatabase
 import com.wakemate.ai.data.preferences.UserPreferencesRepository
 import com.wakemate.ai.data.repository.AlarmRepository
@@ -14,29 +15,14 @@ import com.wakemate.ai.worker.TaskReminderWorker
 
 class WakeMateApp : Application() {
 
-    lateinit var database: WakeMateDatabase
-        private set
-
-    lateinit var alarmRepository: AlarmRepository
-        private set
-
-    lateinit var taskRepository: TaskRepository
-        private set
-
-    lateinit var chatRepository: ChatRepository
-        private set
-
-    lateinit var userPreferencesRepository: UserPreferencesRepository
-        private set
-
-    lateinit var alarmScheduler: AlarmScheduler
-        private set
-
-    lateinit var assistantNluEngine: AssistantNluEngine
-        private set
-
-    lateinit var geminiService: GeminiService
-        private set
+    val database: WakeMateDatabase by lazy { WakeMateDatabase.getDatabase(this) }
+    val alarmRepository: AlarmRepository by lazy { AlarmRepository(database.alarmDao()) }
+    val taskRepository: TaskRepository by lazy { TaskRepository(database.taskDao()) }
+    val chatRepository: ChatRepository by lazy { ChatRepository(database.chatMessageDao()) }
+    val userPreferencesRepository: UserPreferencesRepository by lazy { UserPreferencesRepository(this) }
+    val alarmScheduler: AlarmScheduler by lazy { AlarmScheduler(this) }
+    val assistantNluEngine: AssistantNluEngine by lazy { AssistantNluEngine() }
+    val geminiService: GeminiService by lazy { GeminiService() }
 
     companion object {
         lateinit var instance: WakeMateApp
@@ -47,20 +33,25 @@ class WakeMateApp : Application() {
         super.onCreate()
         instance = this
 
-        // 1. Initialize notification channels
-        NotificationHelper.createNotificationChannels(this)
+        // Safe uncaught exception logger
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            Log.e("WakeMateApp", "CRITICAL UNCAUGHT CRASH: ${throwable.message}", throwable)
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
 
-        // 2. Initialize database & repositories
-        database = WakeMateDatabase.getDatabase(this)
-        alarmRepository = AlarmRepository(database.alarmDao())
-        taskRepository = TaskRepository(database.taskDao())
-        chatRepository = ChatRepository(database.chatMessageDao())
-        userPreferencesRepository = UserPreferencesRepository(this)
-        alarmScheduler = AlarmScheduler(this)
-        assistantNluEngine = AssistantNluEngine()
-        geminiService = GeminiService()
+        // 1. Initialize notification channels safely
+        try {
+            NotificationHelper.createNotificationChannels(this)
+        } catch (e: Throwable) {
+            Log.e("WakeMateApp", "Failed to create notification channels", e)
+        }
 
-        // 3. Initialize background task reminders (every 6 hours)
-        TaskReminderWorker.schedulePeriodicReminder(this, intervalHours = 6)
+        // 2. Initialize background task reminders safely
+        try {
+            TaskReminderWorker.schedulePeriodicReminder(this, intervalHours = 6)
+        } catch (e: Throwable) {
+            Log.e("WakeMateApp", "Failed to schedule background reminder", e)
+        }
     }
 }

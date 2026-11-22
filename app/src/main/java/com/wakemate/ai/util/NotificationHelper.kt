@@ -31,69 +31,72 @@ object NotificationHelper {
     const val NOTIFICATION_ID_TASK_BASE = 2000
 
     fun createNotificationChannels(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                    ?: return
 
-            val alarmSoundUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val alarmSoundUri: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-            val audioAttributes = AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .build()
+                val audioAttributes = AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .build()
 
-            // 1. Alarm Channel
-            val alarmChannel = NotificationChannel(
-                CHANNEL_ALARM,
-                "Smart Alarms",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "High priority smart alarms that wake you up"
-                setSound(alarmSoundUri, audioAttributes)
-                enableVibration(true)
-                vibrationPattern = longArrayOf(0, 500, 250, 500, 250, 500)
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setBypassDnd(true)
+                // 1. Alarm Channel
+                val alarmChannel = NotificationChannel(
+                    CHANNEL_ALARM,
+                    "Smart Alarms",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "High priority smart alarms that wake you up"
+                    alarmSoundUri?.let { setSound(it, audioAttributes) }
+                    enableVibration(true)
+                    vibrationPattern = longArrayOf(0, 500, 250, 500, 250, 500)
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                }
+
+                // 2. Wake-up Verification Channel
+                val verifyChannel = NotificationChannel(
+                    CHANNEL_VERIFY,
+                    "Wake-Up Verification",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Checks if you are truly awake 5 minutes after alarm dismiss"
+                    enableVibration(true)
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                }
+
+                // 3. Charging Challenge Channel
+                val challengeChannel = NotificationChannel(
+                    CHANNEL_CHALLENGE,
+                    "Charging Challenge Alarms",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Urgent alarm that requires plugging in your charger to stop"
+                    alarmSoundUri?.let { setSound(it, audioAttributes) }
+                    enableVibration(true)
+                    vibrationPattern = longArrayOf(0, 300, 150, 300, 150, 600)
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                }
+
+                // 4. Task Reminders Channel
+                val taskChannel = NotificationChannel(
+                    CHANNEL_TASK,
+                    "To-Do & Task Reminders",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Periodic reminders for pending tasks and goals"
+                    enableVibration(true)
+                }
+
+                notificationManager.createNotificationChannels(
+                    listOf(alarmChannel, verifyChannel, challengeChannel, taskChannel)
+                )
             }
-
-            // 2. Wake-up Verification Channel
-            val verifyChannel = NotificationChannel(
-                CHANNEL_VERIFY,
-                "Wake-Up Verification",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Checks if you are truly awake 5 minutes after alarm dismiss"
-                enableVibration(true)
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            }
-
-            // 3. Charging Challenge Channel
-            val challengeChannel = NotificationChannel(
-                CHANNEL_CHALLENGE,
-                "Charging Challenge Alarms",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Urgent alarm that requires plugging in your charger to stop"
-                setSound(alarmSoundUri, audioAttributes)
-                enableVibration(true)
-                vibrationPattern = longArrayOf(0, 300, 150, 300, 150, 600)
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setBypassDnd(true)
-            }
-
-            // 4. Task Reminders Channel
-            val taskChannel = NotificationChannel(
-                CHANNEL_TASK,
-                "To-Do & Task Reminders",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Periodic reminders for pending tasks and goals"
-                enableVibration(true)
-            }
-
-            notificationManager.createNotificationChannels(
-                listOf(alarmChannel, verifyChannel, challengeChannel, taskChannel)
-            )
+        } catch (e: Throwable) {
+            android.util.Log.e("NotificationHelper", "Failed to create notification channels", e)
         }
     }
 
