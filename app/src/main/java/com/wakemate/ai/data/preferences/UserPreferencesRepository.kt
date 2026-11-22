@@ -12,6 +12,7 @@ import java.io.IOException
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
 data class UserPreferences(
+    val userName: String = "Ammar",
     val alarmVolume: Float = 0.9f,
     val vibrationEnabled: Boolean = true,
     val verificationDelayMinutes: Int = 5,
@@ -26,6 +27,7 @@ data class UserPreferences(
 class UserPreferencesRepository(private val context: Context) {
 
     private object Keys {
+        val USER_NAME = stringPreferencesKey("user_name")
         val ALARM_VOLUME = floatPreferencesKey("alarm_volume")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val VERIFICATION_DELAY_MIN = intPreferencesKey("verification_delay_minutes")
@@ -47,6 +49,7 @@ class UserPreferencesRepository(private val context: Context) {
         }
         .map { preferences ->
             UserPreferences(
+                userName = preferences[Keys.USER_NAME] ?: "Ammar",
                 alarmVolume = preferences[Keys.ALARM_VOLUME] ?: 0.9f,
                 vibrationEnabled = preferences[Keys.VIBRATION_ENABLED] ?: true,
                 verificationDelayMinutes = preferences[Keys.VERIFICATION_DELAY_MIN] ?: 5,
@@ -58,6 +61,10 @@ class UserPreferencesRepository(private val context: Context) {
                 geminiApiKey = preferences[Keys.GEMINI_API_KEY] ?: ""
             )
         }
+
+    suspend fun updateUserName(name: String) {
+        context.dataStore.edit { it[Keys.USER_NAME] = name }
+    }
 
     suspend fun updateAlarmVolume(volume: Float) {
         context.dataStore.edit { it[Keys.ALARM_VOLUME] = volume }

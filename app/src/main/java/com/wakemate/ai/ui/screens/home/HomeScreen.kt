@@ -2,7 +2,6 @@ package com.wakemate.ai.ui.screens.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,11 +17,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +30,7 @@ import com.wakemate.ai.ui.components.PriorityBadge
 import com.wakemate.ai.ui.theme.*
 import com.wakemate.ai.util.DateTimeUtils
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToAlarms: () -> Unit,
@@ -39,203 +39,456 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    var showEditNameDialog by remember { mutableStateOf(false) }
+    var tempNameInput by remember { mutableStateOf("") }
+
+    if (showEditNameDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditNameDialog = false },
+            title = {
+                Text(
+                    text = "Apna Naam Likhein",
+                    color = TextPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                OutlinedTextField(
+                    value = tempNameInput,
+                    onValueChange = { tempNameInput = it },
+                    label = { Text("Your Name") },
+                    singleLine = true,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = NeonCyan,
+                        unfocusedBorderColor = DarkCardBorder,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (tempNameInput.isNotBlank()) {
+                            viewModel.updateUserName(tempNameInput.trim())
+                        }
+                        showEditNameDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = NeonCyan)
+                ) {
+                    Text("Save", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditNameDialog = false }) {
+                    Text("Cancel", color = TextSecondary)
+                }
+            },
+            containerColor = DarkSurface
+        )
+    }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBg)
             .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        contentPadding = PaddingValues(top = 20.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 1. Digital Clock & Date Header
+        // 1. Personalized Greeting Header & Name Editor
         item {
-            Column(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = state.currentDateString.uppercase(),
-                    color = NeonCyan,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.5.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = state.currentTimeString,
-                    color = TextPrimary,
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = (-1).sp
-                )
-            }
-        }
+                Column {
+                    Text(
+                        text = "ASSALAM-O-ALAIKUM",
+                        color = NeonCyan,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    )
+                    Text(
+                        text = "${state.userName} 👋",
+                        color = TextPrimary,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
 
-        // 2. AI Assistant Motivation Card
-        item {
-            NeonCard(
-                modifier = Modifier.fillMaxWidth(),
-                glowAccent = NeonPurple,
-                backgroundColor = DarkSurfaceVariant
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Surface(
+                    onClick = {
+                        tempNameInput = state.userName
+                        showEditNameDialog = true
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    color = DarkSurfaceVariant,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, DarkCardBorder)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .background(
-                                Brush.linearGradient(listOf(NeonCyan, NeonPurple)),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
-                            contentDescription = "AI Assistant",
-                            tint = DarkBg,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(14.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "✏️", fontSize = 11.sp)
                         Text(
-                            text = "WakeMate Assistant",
-                            color = NeonPurple,
+                            text = "Name",
+                            color = NeonCyan,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = state.motivationalMessage,
-                            color = TextPrimary,
-                            fontSize = 14.sp,
-                            lineHeight = 18.sp
                         )
                     }
                 }
             }
         }
 
-        // 3. Next Alarm Card
+        // 2. Digital Clock & Date Card
         item {
             NeonCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onNavigateToAlarms() },
-                glowAccent = if (state.nextAlarm?.isEnabled == true) NeonCyan else null
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = DarkSurface,
+                borderColor = DarkCardBorder
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = state.currentDateString.uppercase(),
+                        color = NeonCyan,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = state.currentTimeString,
+                        color = TextPrimary,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-1).sp
+                    )
+                    Text(
+                        text = "Early wake-up = Barakah in your day ☀️",
+                        color = TextSecondary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+
+        // 3. 3-Pillar Daily Inspiration Card (Ayat / Hadees / Motivation)
+        item {
+            NeonCard(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = DarkSurface,
+                borderColor = DarkCardBorder
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    // Category Selector & Navigation Controls
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Filled.Alarm,
-                                contentDescription = "Next Alarm",
-                                tint = NeonCyan,
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                        // Tabs
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            // 0: Ayat
+                            Surface(
+                                onClick = { viewModel.switchInspirationTab(0) },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (state.activeInspirationTab == 0) NeonGreen else DarkSurfaceVariant
+                            ) {
+                                Text(
+                                    text = "📖 Ayat",
+                                    color = if (state.activeInspirationTab == 0) Color.White else TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+
+                            // 1: Hadees
+                            Surface(
+                                onClick = { viewModel.switchInspirationTab(1) },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (state.activeInspirationTab == 1) NeonAmber else DarkSurfaceVariant
+                            ) {
+                                Text(
+                                    text = "📜 Hadees",
+                                    color = if (state.activeInspirationTab == 1) Color.White else TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+
+                            // 2: Grind
+                            Surface(
+                                onClick = { viewModel.switchInspirationTab(2) },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (state.activeInspirationTab == 2) NeonPink else DarkSurfaceVariant
+                            ) {
+                                Text(
+                                    text = "🔥 Grind",
+                                    color = if (state.activeInspirationTab == 2) Color.White else TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+
+                        // Next / Prev buttons
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            IconButton(
+                                onClick = { viewModel.prevInspiration() },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Text(text = "❮", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                            IconButton(
+                                onClick = { viewModel.nextInspiration() },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Text(text = "❯", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Content Switcher
+                    when (state.activeInspirationTab) {
+                        0 -> {
+                            // Ayat
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = state.currentAyat.arabic,
+                                    color = TextPrimary,
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.End,
+                                    lineHeight = 26.sp,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Text(
+                                    text = state.currentAyat.urdu,
+                                    color = TextPrimary,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    lineHeight = 18.sp
+                                )
+                                Text(
+                                    text = "\"${state.currentAyat.english}\"",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontStyle = FontStyle.Italic
+                                )
+                                Text(
+                                    text = state.currentAyat.reference,
+                                    color = NeonGreen,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.align(Alignment.End)
+                                )
+                            }
+                        }
+                        1 -> {
+                            // Hadees
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = state.currentHadees.arabic,
+                                    color = TextPrimary,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.End,
+                                    lineHeight = 24.sp,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Text(
+                                    text = state.currentHadees.urdu,
+                                    color = TextPrimary,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    lineHeight = 18.sp
+                                )
+                                Text(
+                                    text = "\"${state.currentHadees.english}\"",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontStyle = FontStyle.Italic
+                                )
+                                Text(
+                                    text = state.currentHadees.reference,
+                                    color = NeonAmber,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.align(Alignment.End)
+                                )
+                            }
+                        }
+                        else -> {
+                            // Grind & Comeback Motivation
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = "🔥 ${state.currentMotivation.title.uppercase()}",
+                                    color = NeonPink,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = state.currentMotivation.urdu,
+                                    color = TextPrimary,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    lineHeight = 19.sp
+                                )
+                                Text(
+                                    text = "\"${state.currentMotivation.english}\"",
+                                    color = TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontStyle = FontStyle.Italic
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Stay relentless, ${state.userName} ⚡",
+                                        color = NeonPink,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Tap ❯ for next",
+                                        color = NeonCyan,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        modifier = Modifier.clickable { viewModel.nextInspiration() }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Next Upcoming Alarm Card
+        item {
+            NeonCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToAlarms() },
+                backgroundColor = DarkSurface,
+                borderColor = DarkCardBorder
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(text = "⏰", fontSize = 16.sp)
                             Text(
                                 text = "NEXT ALARM",
                                 color = TextSecondary,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
                         }
 
-                        state.nextAlarm?.let { alarm ->
-                            Switch(
-                                checked = alarm.isEnabled,
-                                onCheckedChange = { viewModel.toggleAlarm(alarm) },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = DarkBg,
-                                    checkedTrackColor = NeonCyan,
-                                    uncheckedThumbColor = TextMuted,
-                                    uncheckedTrackColor = DarkCardBorder
-                                )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = DarkSurfaceVariant,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, DarkCardBorder)
+                        ) {
+                            Text(
+                                text = state.nextAlarmCountdown,
+                                color = NeonCyan,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     if (state.nextAlarm != null) {
-                        val (timeStr, amPm) = DateTimeUtils.formatHourMinute(
-                            state.nextAlarm!!.hour,
-                            state.nextAlarm!!.minute
+                        val alarm = state.nextAlarm!!
+                        val timeFormatted = DateTimeUtils.formatTime(alarm.hour, alarm.minute)
+                        Text(
+                            text = timeFormatted,
+                            color = TextPrimary,
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.ExtraBold
                         )
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            Text(
-                                text = timeStr,
-                                color = TextPrimary,
-                                fontSize = 38.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = amPm,
-                                color = NeonCyan,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = state.nextAlarm!!.label,
-                                color = TextSecondary,
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = state.nextAlarmCountdown,
-                                color = NeonPurple,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                        Text(
+                            text = alarm.label,
+                            color = TextSecondary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     } else {
                         Text(
-                            text = "No active alarms",
+                            text = "--:--",
+                            color = TextMuted,
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Text(
+                            text = "No alarms scheduled",
                             color = TextSecondary,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            fontSize = 13.sp
                         )
                     }
                 }
             }
         }
 
-        // 4. Daily Progress & Tasks Summary Card
+        // 5. Daily Task Completion Ring
         item {
-            NeonCard(modifier = Modifier.fillMaxWidth()) {
+            NeonCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToTasks() },
+                backgroundColor = DarkSurface,
+                borderColor = DarkCardBorder
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Circular Progress
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(76.dp)
+                        modifier = Modifier.size(68.dp)
                     ) {
                         val animatedPercent by animateFloatAsState(
                             targetValue = state.completedPercentage / 100f,
@@ -248,47 +501,52 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxSize(),
                             color = NeonCyan,
                             trackColor = DarkCardBorder,
-                            strokeWidth = 7.dp,
+                            strokeWidth = 6.dp,
                             strokeCap = StrokeCap.Round
                         )
 
                         Text(
                             text = "${state.completedPercentage}%",
                             color = TextPrimary,
-                            fontSize = 16.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(18.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "DAILY PRODUCTIVITY",
+                            text = "DAILY GOALS",
                             color = TextSecondary,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = "${state.completedTasks.size} of ${state.totalTasksCount} tasks completed",
                             color = TextPrimary,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Next: ${state.nextReminderInfo}",
-                            color = NeonPurple,
-                            fontSize = 12.sp
+                            text = "Auto reminder every 6 hours",
+                            color = TextSecondary,
+                            fontSize = 11.sp
                         )
                     }
+
+                    Icon(
+                        imageVector = Icons.Filled.ChevronRight,
+                        contentDescription = "View Tasks",
+                        tint = TextSecondary
+                    )
                 }
             }
         }
 
-        // 5. Quick Pending Tasks Preview
+        // 6. Pending Tasks Preview Header
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -296,35 +554,43 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "PENDING TASKS",
+                    text = "TODAY'S PRIORITIES",
                     color = TextSecondary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
                 Text(
-                    text = "See All (${state.pendingTasks.size})",
+                    text = "View All",
                     color = NeonCyan,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onNavigateToTasks() }
                 )
             }
         }
 
+        // 7. Pending Tasks List Items
         if (state.pendingTasks.isEmpty()) {
             item {
-                NeonCard(modifier = Modifier.fillMaxWidth()) {
-                    Box(
+                NeonCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    backgroundColor = DarkSurface,
+                    borderColor = DarkCardBorder
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(24.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Text(text = "🎉", fontSize = 24.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "All tasks completed! Enjoy your day 🎯",
-                            color = TextSecondary,
-                            fontSize = 14.sp
+                            text = "All clear! No pending tasks.",
+                            color = TextPrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -333,7 +599,8 @@ fun HomeScreen(
             items(state.pendingTasks.take(3)) { task ->
                 NeonCard(
                     modifier = Modifier.fillMaxWidth(),
-                    cornerRadius = 14.dp
+                    backgroundColor = DarkSurface,
+                    borderColor = DarkCardBorder
                 ) {
                     Row(
                         modifier = Modifier
@@ -341,65 +608,27 @@ fun HomeScreen(
                             .padding(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox(
-                            checked = task.isCompleted,
-                            onCheckedChange = { viewModel.toggleTaskComplete(task) },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = NeonCyan,
-                                checkmarkColor = DarkBg,
-                                uncheckedColor = DarkCardBorder
-                            )
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .border(1.5.dp, DarkCardBorder, CircleShape)
                         )
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = task.title,
                                 color = TextPrimary,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = DateTimeUtils.formatDateTime(task.dueDateTimeMillis),
-                                color = TextMuted,
-                                fontSize = 12.sp
+                                text = task.category,
+                                color = TextSecondary,
+                                fontSize = 11.sp
                             )
                         }
-
                         PriorityBadge(priority = task.priority)
                     }
-                }
-            }
-        }
-
-        // 6. Quick Action Buttons
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onNavigateToChat,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = NeonPurple),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Icon(Icons.Filled.Chat, contentDescription = null, tint = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Chat AI", color = Color.White, fontWeight = FontWeight.Bold)
-                }
-
-                OutlinedButton(
-                    onClick = onNavigateToTasks,
-                    modifier = Modifier.weight(1f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null, tint = NeonCyan)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Add Task", color = NeonCyan, fontWeight = FontWeight.Bold)
                 }
             }
         }

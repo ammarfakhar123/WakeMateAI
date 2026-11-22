@@ -23,6 +23,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             initialValue = UserPreferences()
         )
 
+    fun updateUserName(name: String) {
+        viewModelScope.launch {
+            prefsRepo.updateUserName(name)
+        }
+    }
+
     fun updateAlarmVolume(volume: Float) {
         viewModelScope.launch {
             prefsRepo.updateAlarmVolume(volume)

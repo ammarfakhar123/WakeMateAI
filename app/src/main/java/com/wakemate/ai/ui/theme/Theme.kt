@@ -1,26 +1,26 @@
 package com.wakemate.ai.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
+private val LightColorScheme = lightColorScheme(
     primary = NeonCyan,
-    onPrimary = DarkBg,
-    primaryContainer = NeonViolet,
+    onPrimary = Color.White,
+    primaryContainer = DarkSurfaceVariant,
     onPrimaryContainer = TextPrimary,
     secondary = NeonPurple,
-    onSecondary = DarkBg,
+    onSecondary = Color.White,
     secondaryContainer = DarkSurfaceVariant,
     onSecondaryContainer = TextPrimary,
     tertiary = NeonPink,
-    onTertiary = DarkBg,
+    onTertiary = Color.White,
     background = DarkBg,
     onBackground = TextPrimary,
     surface = DarkSurface,
@@ -33,10 +33,10 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun WakeMateAITheme(
-    darkTheme: Boolean = true, // Default to deep dark neon theme
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorScheme
+    val colorScheme = LightColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -44,8 +44,8 @@ fun WakeMateAITheme(
             window?.let {
                 it.statusBarColor = DarkBg.toArgb()
                 it.navigationBarColor = DarkBg.toArgb()
-                WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = false
-                WindowCompat.getInsetsController(it, view).isAppearanceLightNavigationBars = false
+                WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = true
+                WindowCompat.getInsetsController(it, view).isAppearanceLightNavigationBars = true
             }
         }
     }

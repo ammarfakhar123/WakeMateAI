@@ -72,6 +72,57 @@ fun SettingsScreen(
             }
         }
 
+        // Section 0: User Name Setting
+        item {
+            NeonCard(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = DarkSurface,
+                borderColor = DarkCardBorder
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "PROFILE & NAME",
+                        color = NeonCyan,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Your Name (Apna Naam):",
+                        color = TextPrimary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    var nameInput by remember(prefs.userName) { mutableStateOf(prefs.userName) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = nameInput,
+                            onValueChange = { nameInput = it },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Button(
+                            onClick = {
+                                if (nameInput.isNotBlank()) {
+                                    viewModel.updateUserName(nameInput.trim())
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text("Save", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
         // Section 1: Android System Permissions & Exact Alarm Notice
         item {
             NeonCard(

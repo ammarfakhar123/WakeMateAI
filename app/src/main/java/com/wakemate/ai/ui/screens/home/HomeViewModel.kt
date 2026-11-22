@@ -6,12 +6,17 @@ import androidx.lifecycle.viewModelScope
 import com.wakemate.ai.WakeMateApp
 import com.wakemate.ai.data.local.entity.AlarmEntity
 import com.wakemate.ai.data.local.entity.TaskEntity
+import com.wakemate.ai.data.repository.DailyAyat
+import com.wakemate.ai.data.repository.DailyHadees
+import com.wakemate.ai.data.repository.DailyMotivation
+import com.wakemate.ai.data.repository.InspirationRepository
 import com.wakemate.ai.util.DateTimeUtils
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
 data class HomeUiState(
+    val userName: String = "Ammar",
     val currentTimeString: String = "",
     val currentDateString: String = "",
     val nextAlarm: AlarmEntity? = null,
@@ -20,6 +25,11 @@ data class HomeUiState(
     val completedTasks: List<TaskEntity> = emptyList(),
     val totalTasksCount: Int = 0,
     val completedPercentage: Int = 0,
+    val activeInspirationTab: Int = 0, // 0: Ayat, 1: Hadees, 2: Motivation
+    val inspirationOffset: Int = 0,
+    val currentAyat: DailyAyat = InspirationRepository.getTodayAyat(),
+    val currentHadees: DailyHadees = InspirationRepository.getTodayHadees(),
+    val currentMotivation: DailyMotivation = InspirationRepository.getTodayMotivation(),
     val motivationalMessage: String = "Welcome to WakeMate AI! Let's conquer the day.",
     val nextReminderInfo: String = "Scheduled every 6 hours"
 )
@@ -40,7 +50,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun loadData() {
-        // Observe alarms and calculate next upcoming alarm
         viewModelScope.launch {
             combine(
                 alarmRepo.allAlarms,
@@ -65,23 +74,16 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 val total = tasks.size
                 val percent = if (total > 0) ((completed.size.toFloat() / total) * 100).toInt() else 0
 
-                val motivation = generateMotivationalMessage(
-                    personality = prefs.assistantPersonality,
-                    pendingCount = pending.size,
-                    language = prefs.language
-                )
-
-                val reminderInfo = "Scheduled every ${prefs.taskReminderIntervalHours} hours"
-
-                val now = System.currentTimeMillis()
                 val calendar = Calendar.getInstance()
                 val timeStr = DateTimeUtils.formatTime(
                     calendar.get(Calendar.HOUR_OF_DAY),
                     calendar.get(Calendar.MINUTE)
                 )
-                val dateStr = DateTimeUtils.formatDate(now)
+                val dateStr = DateTimeUtils.formatDate(calendar.timeInMillis)
 
-                HomeUiState(
+                val offset = _uiState.value.inspirationOffset
+                _uiState.value.copy(
+                    userName = prefs.userName,
                     currentTimeString = timeStr,
                     currentDateString = dateStr,
                     nextAlarm = nextAlarm,
@@ -90,64 +92,54 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     completedTasks = completed,
                     totalTasksCount = total,
                     completedPercentage = percent,
-                    motivationalMessage = motivation,
-                    nextReminderInfo = reminderInfo
+                    currentAyat = InspirationRepository.getTodayAyat(offset),
+                    currentHadees = InspirationRepository.getTodayHadees(offset),
+                    currentMotivation = InspirationRepository.getTodayMotivation(offset)
                 )
-            }.collect { state ->
-                _uiState.value = state
+            }.collect { newState ->
+                _uiState.value = newState
             }
         }
     }
 
-    private fun findNextAlarm(enabledAlarms: List<AlarmEntity>): AlarmEntity? {
-        if (enabledAlarms.isEmpty()) return null
-        return enabledAlarms.minByOrNull {
-            DateTimeUtils.calculateNextTriggerMillis(it.hour, it.minute, it.daysOfWeek)
+    fun switchInspirationTab(tabIndex: Int) {
+        _uiState.update { it.copy(activeInspirationTab = tabIndex) }
+    }
+
+    fun nextInspiration() {
+        _uiState.update { current ->
+            val newOffset = current.inspirationOffset + 1
+            current.copy(
+                inspirationOffset = newOffset,
+                currentAyat = InspirationRepository.getTodayAyat(newOffset),
+                currentHadees = InspirationRepository.getTodayHadees(newOffset),
+                currentMotivation = InspirationRepository.getTodayMotivation(newOffset)
+            )
         }
     }
 
-    private fun generateMotivationalMessage(
-        personality: String,
-        pendingCount: Int,
-        language: String
-    ): String {
-        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val timeGreeting = when {
-            hour < 12 -> "Good morning"
-            hour < 17 -> "Good afternoon"
-            else -> "Good evening"
-        }
-
-        if (language == "roman_ur") {
-            return when {
-                pendingCount == 0 -> "Sub set hai! Koi pending task nahi hai. Mazay karo! 🚀"
-                pendingCount <= 2 -> "Aap ke paas $pendingCount tasks hain. Thori mehnat aur sab complete! 💪"
-                else -> "Aaj $pendingCount tasks karne hain! Time zaya mat karo, lag jao kaam pe! ⚡"
-            }
-        }
-
-        return when (personality) {
-            "MOTIVATIONAL" -> "$timeGreeting! 🌟 You have $pendingCount pending mission(s). Every step forward counts!"
-            "STRICT" -> "Attention! 🎯 $pendingCount task(s) waiting. No excuses, make progress now!"
-            else -> "$timeGreeting! ☀️ You have $pendingCount task(s) planned today. How can WakeMate help?"
+    fun prevInspiration() {
+        _uiState.update { current ->
+            val newOffset = if (current.inspirationOffset > 0) current.inspirationOffset - 1 else 0
+            current.copy(
+                inspirationOffset = newOffset,
+                currentAyat = InspirationRepository.getTodayAyat(newOffset),
+                currentHadees = InspirationRepository.getTodayHadees(newOffset),
+                currentMotivation = InspirationRepository.getTodayMotivation(newOffset)
+            )
         }
     }
 
-    fun toggleAlarm(alarm: AlarmEntity) {
+    fun updateUserName(name: String) {
         viewModelScope.launch {
-            val newEnabled = !alarm.isEnabled
-            alarmRepo.setAlarmEnabled(alarm.id, newEnabled)
-            if (newEnabled) {
-                alarmScheduler.scheduleAlarm(alarm.copy(isEnabled = true))
-            } else {
-                alarmScheduler.cancelAlarm(alarm.id)
-            }
+            prefsRepo.updateUserName(name)
         }
     }
 
-    fun toggleTaskComplete(task: TaskEntity) {
-        viewModelScope.launch {
-            taskRepo.setTaskCompleted(task.id, !task.isCompleted)
+    private fun findNextAlarm(alarms: List<AlarmEntity>): AlarmEntity? {
+        if (alarms.isEmpty()) return null
+        return alarms.minByOrNull { alarm ->
+            DateTimeUtils.calculateNextTriggerMillis(alarm.hour, alarm.minute, alarm.daysOfWeek)
         }
     }
 }
