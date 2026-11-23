@@ -56,15 +56,18 @@ jobs:
       - name: Verify Flutter APK Output
         id: verify_flutter_apk
         run: |
-          if [ -f wakemate_flutter/build/app/outputs/flutter-apk/app-debug.apk ]; then
+          echo "Searching for generated APK files..."
+          APK_PATH=$(find wakemate_flutter/build -type f -name "*.apk" | head -n 1)
+          if [ -n "$APK_PATH" ] && [ -f "$APK_PATH" ]; then
             echo "apk_exists=true" >> $GITHUB_OUTPUT
-            echo "Successfully generated Flutter APK:"
-            ls -lh wakemate_flutter/build/app/outputs/flutter-apk/app-debug.apk
-            cp wakemate_flutter/build/app/outputs/flutter-apk/app-debug.apk ./wakemate-flutter-debug.apk
+            echo "Successfully found Flutter APK at: $APK_PATH"
+            ls -lh "$APK_PATH"
+            cp "$APK_PATH" ./wakemate-flutter-debug.apk
+            echo "Copied to ./wakemate-flutter-debug.apk ($(ls -lh ./wakemate-flutter-debug.apk | awk '{print $5}'))"
           else
             echo "apk_exists=false" >> $GITHUB_OUTPUT
-            echo "No Flutter APK found at expected location!"
-            find wakemate_flutter/build -name "*.apk" || true
+            echo "No Flutter APK found anywhere in wakemate_flutter/build!"
+            ls -R wakemate_flutter/build || true
           fi
 
       - name: Upload Artifact
