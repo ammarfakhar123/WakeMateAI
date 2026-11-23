@@ -39,28 +39,36 @@ jobs:
           flutter pub add shared_preferences:^2.2.3 intl:^0.19.0 cupertino_icons:^1.0.8
           flutter pub get
 
+      - name: Analyze Dart Code
+        working-directory: ./wakemate_flutter
+        run: flutter analyze || true
+
       - name: Build Debug APK
         id: build_step
         working-directory: ./wakemate_flutter
         run: |
           set -o pipefail
-          flutter build apk --debug --verbose 2>&1 | tee build_flutter.log
+          flutter build apk --debug 2>&1 | tee build_flutter.log
 
-      - name: Print Flutter Build Log Always
-        if: always()
+      - name: Prepare Failure Summary
+        if: failure()
         run: |
-          if [ -f wakemate_flutter/build_flutter.log ]; then
-            echo "==================== FULL FLUTTER BUILD LOG ===================="
-            tail -n 150 wakemate_flutter/build_flutter.log
-            echo "================================================================"
-          fi
+          echo "### Flutter Build Failed (Run ${{ github.run_number }})" > build_summary.md
+          echo '```' >> build_summary.md
+          tail -n 80 wakemate_flutter/build_flutter.log >> build_summary.md || true
+          echo '```' >> build_summary.md
 
-      - name: Upload Build Log Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Publish Failure Release
+        if: failure()
+        uses: softprops/action-gh-release@v2
         with:
-          name: flutter-build-log
-          path: wakemate_flutter/build_flutter.log
+          tag_name: "flutter-failed-${{ github.run_number }}"
+          name: "Flutter Build Failed (Run ${{ github.run_number }})"
+          body_path: build_summary.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Locate and Stage Flutter APK
         run: |

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../providers/app_state.dart';
+import '../models/inspiration_item.dart';
 import '../data/bulk_inspiration_data.dart';
 import '../widgets/custom_name_dialog.dart';
 import '../widgets/arabic_paste_dialog.dart';

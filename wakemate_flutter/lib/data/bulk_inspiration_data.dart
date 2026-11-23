@@ -1,4 +1,4 @@
-import '../models/alarm_item.dart';
+import '../models/inspiration_item.dart';
 
 class BulkInspirationData {
   static final List<InspirationItem> ayats = [
