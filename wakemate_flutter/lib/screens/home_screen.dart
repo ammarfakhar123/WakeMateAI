@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import '../theme/app_theme.dart';
 import '../providers/app_state.dart';
 import '../models/inspiration_item.dart';
