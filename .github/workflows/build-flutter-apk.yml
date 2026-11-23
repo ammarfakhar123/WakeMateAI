@@ -53,32 +53,28 @@ jobs:
             cat wakemate_flutter/build_flutter.log | tail -n 120
           fi
 
-      - name: Verify Flutter APK Output
-        id: verify_flutter_apk
+      - name: Locate and Stage Flutter APK
         run: |
-          echo "Searching for generated APK files..."
-          APK_PATH=$(find wakemate_flutter/build -type f -name "*.apk" | head -n 1)
-          if [ -n "$APK_PATH" ] && [ -f "$APK_PATH" ]; then
-            echo "apk_exists=true" >> $GITHUB_OUTPUT
-            echo "Successfully found Flutter APK at: $APK_PATH"
-            ls -lh "$APK_PATH"
-            cp "$APK_PATH" ./wakemate-flutter-debug.apk
-            echo "Copied to ./wakemate-flutter-debug.apk ($(ls -lh ./wakemate-flutter-debug.apk | awk '{print $5}'))"
-          else
-            echo "apk_exists=false" >> $GITHUB_OUTPUT
-            echo "No Flutter APK found anywhere in wakemate_flutter/build!"
-            ls -R wakemate_flutter/build || true
+          echo "=== SEARCHING WORKSPACE FOR GENERATED APKs ==="
+          find . -type f -name "*.apk"
+          APK_FILE=$(find . -type f -name "*debug*.apk" -o -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            echo "ERROR: No APK was found in the workspace!"
+            ls -la
+            exit 1
           fi
+          echo "Found APK at: $APK_FILE"
+          ls -lh "$APK_FILE"
+          cp "$APK_FILE" ./wakemate-flutter-debug.apk
+          echo "Staged to ./wakemate-flutter-debug.apk ($(ls -lh ./wakemate-flutter-debug.apk | awk '{print $5}'))"
 
       - name: Upload Artifact
-        if: steps.verify_flutter_apk.outputs.apk_exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: wakemate-flutter-debug
           path: ./wakemate-flutter-debug.apk
 
       - name: Create GitHub Release with Direct APK Download
-        if: steps.verify_flutter_apk.outputs.apk_exists == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "v1.1.${{ github.run_number }}"
@@ -101,9 +97,3 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Fail If APK Missing
-        if: steps.verify_flutter_apk.outputs.apk_exists != 'true'
-        run: |
-          echo "ERROR: Flutter APK was not produced."
-          exit 1
