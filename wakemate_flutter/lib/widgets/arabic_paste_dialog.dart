@@ -28,9 +28,10 @@ class _ArabicPasteDialogState extends State<ArabicPasteDialog> {
 
   Future<void> _pasteFromClipboard() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text != null && data!.text!.isNotEmpty) {
+    final text = data?.text;
+    if (text != null && text.isNotEmpty) {
       setState(() {
-        _arabicController.text = data.text!;
+        _arabicController.text = text;
       });
     }
   }

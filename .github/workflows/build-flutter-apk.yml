@@ -33,34 +33,42 @@ jobs:
       - name: Scaffold Official Flutter Android Platform
         working-directory: ./wakemate_flutter
         run: |
+          cp pubspec.yaml pubspec.yaml.save
           flutter create . --org com.wakemate.ai --project-name wakemate_flutter --platforms=android
-
-      - name: Get Flutter Packages
-        working-directory: ./wakemate_flutter
-        run: flutter pub get
+          cp pubspec.yaml.save pubspec.yaml
+          flutter pub add shared_preferences:^2.2.3 intl:^0.19.0 cupertino_icons:^1.0.8
+          flutter pub get
 
       - name: Build Debug APK
         id: build_step
         working-directory: ./wakemate_flutter
         run: |
-          flutter build apk --debug 2>&1 | tee build_flutter.log
+          set -o pipefail
+          flutter build apk --debug --verbose 2>&1 | tee build_flutter.log
 
-      - name: Print Build Log on Failure
-        if: failure()
+      - name: Print Flutter Build Log Always
+        if: always()
         run: |
           if [ -f wakemate_flutter/build_flutter.log ]; then
-            echo "=== FLUTTER BUILD LOG OUTPUT ==="
-            cat wakemate_flutter/build_flutter.log | tail -n 120
+            echo "==================== FULL FLUTTER BUILD LOG ===================="
+            tail -n 150 wakemate_flutter/build_flutter.log
+            echo "================================================================"
           fi
+
+      - name: Upload Build Log Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-build-log
+          path: wakemate_flutter/build_flutter.log
 
       - name: Locate and Stage Flutter APK
         run: |
           echo "=== SEARCHING WORKSPACE FOR GENERATED APKs ==="
           find . -type f -name "*.apk"
-          APK_FILE=$(find . -type f -name "*debug*.apk" -o -name "*.apk" | head -n 1)
+          APK_FILE=$(find . -type f -name "*.apk" | head -n 1)
           if [ -z "$APK_FILE" ]; then
             echo "ERROR: No APK was found in the workspace!"
-            ls -la
             exit 1
           fi
           echo "Found APK at: $APK_FILE"
@@ -68,7 +76,7 @@ jobs:
           cp "$APK_FILE" ./wakemate-flutter-debug.apk
           echo "Staged to ./wakemate-flutter-debug.apk ($(ls -lh ./wakemate-flutter-debug.apk | awk '{print $5}'))"
 
-      - name: Upload Artifact
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: wakemate-flutter-debug
@@ -82,16 +90,16 @@ jobs:
           body: |
             ### 🚀 WakeMate AI - Flutter Cross-Platform Release (v1.1.${{ github.run_number }})
 
-            ✨ **Key Features:**
-            - 💰 **Personal Finance Manager**: Income, Expense & PKR Net Balance tracking, category breakdowns, transaction history with delete.
-            - 📖 **Daily Azkar & Custom Arabic Paste**: Dedicated RTL Arabic text area to paste any custom Dua/Ayat directly from clipboard with interactive **Digital Tasbeeh Counter** (+1 tap, circular progress, haptic feedback).
-            - ☀️ **Clean Modern Light Theme**: Apple/Material 3 style with slate & emerald accents.
+            ✨ **Key Features in this update:**
+            - 💰 **Personal Finance Manager**: Track Income & Expenses with auto PKR Rs. Net Balance calculation and categorized history.
+            - 📖 **Daily Azkar & Custom Arabic Paste**: Dedicated RTL Arabic text area to paste any custom Dua/Ayat from your clipboard with interactive **Digital Tasbeeh Counter** (+1 tap, circular progress, haptic feedback).
+            - ☀️ **Clean Modern Light Theme**: High-contrast Apple/Material 3 style with slate & emerald tones.
             - 👤 **Custom User Name**: Personalized morning greetings ("Assalam-o-Alaikum, [Name] 👋").
             - ⚡ **3-Pillar Daily Inspiration**: 40+ Quranic Ayats, 40+ Sahih Ahadith, and 40+ Hard-hitting Grind & Comeback Motivation quotes.
-            - ⏰ **Smart Alarms**: 5-minute wake-up check & charging challenge.
+            - ⏰ **Smart Alarms & Wake-Up Check**: 5-minute anti-snooze verification & charging challenge.
 
-            📲 **Direct Download:**
-            Click on **`wakemate-flutter-debug.apk`** below under **Assets** to download directly to your phone and install!
+            📲 **Installation:**
+            Tap on **`wakemate-flutter-debug.apk`** below under **Assets** to download directly to your Android device and install!
           files: ./wakemate-flutter-debug.apk
           draft: false
           prerelease: false
