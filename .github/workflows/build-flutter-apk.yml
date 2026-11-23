@@ -30,6 +30,11 @@ jobs:
       - name: Run Flutter Doctor
         run: flutter doctor -v
 
+      - name: Scaffold Official Flutter Android Platform
+        working-directory: ./wakemate_flutter
+        run: |
+          flutter create . --org com.wakemate.ai --project-name wakemate_flutter --platforms=android
+
       - name: Get Flutter Packages
         working-directory: ./wakemate_flutter
         run: flutter pub get
@@ -38,8 +43,15 @@ jobs:
         id: build_step
         working-directory: ./wakemate_flutter
         run: |
-          set -o pipefail
           flutter build apk --debug 2>&1 | tee build_flutter.log
+
+      - name: Print Build Log on Failure
+        if: failure()
+        run: |
+          if [ -f wakemate_flutter/build_flutter.log ]; then
+            echo "=== FLUTTER BUILD LOG OUTPUT ==="
+            cat wakemate_flutter/build_flutter.log | tail -n 120
+          fi
 
       - name: Verify Flutter APK Output
         id: verify_flutter_apk
@@ -51,7 +63,7 @@ jobs:
             cp wakemate_flutter/build/app/outputs/flutter-apk/app-debug.apk ./wakemate-flutter-debug.apk
           else
             echo "apk_exists=false" >> $GITHUB_OUTPUT
-            echo "No Flutter APK found!"
+            echo "No Flutter APK found at expected location!"
             find wakemate_flutter/build -name "*.apk" || true
           fi
 
@@ -62,7 +74,7 @@ jobs:
           name: wakemate-flutter-debug
           path: ./wakemate-flutter-debug.apk
 
-      - name: Create GitHub Release with APK
+      - name: Create GitHub Release with Direct APK Download
         if: steps.verify_flutter_apk.outputs.apk_exists == 'true'
         uses: softprops/action-gh-release@v2
         with:
@@ -71,16 +83,16 @@ jobs:
           body: |
             ### 🚀 WakeMate AI - Flutter Cross-Platform Release (v1.1.${{ github.run_number }})
 
-            ✨ **Key Features in this update:**
-            - 💰 **Personal Finance Manager**: Track Income & Expenses with auto PKR Rs. Net Balance calculation and categorized history.
-            - 📖 **Daily Azkar & Custom Arabic Paste**: Dedicated RTL Arabic text area to paste any custom Dua/Ayat from your clipboard with interactive **Digital Tasbeeh Counter** (+1 tap, circular progress, haptic feedback).
-            - ☀️ **Clean Modern Light Theme**: High-contrast Apple/Material 3 style with slate & emerald tones.
+            ✨ **Key Features:**
+            - 💰 **Personal Finance Manager**: Income, Expense & PKR Net Balance tracking, category breakdowns, transaction history with delete.
+            - 📖 **Daily Azkar & Custom Arabic Paste**: Dedicated RTL Arabic text area to paste any custom Dua/Ayat directly from clipboard with interactive **Digital Tasbeeh Counter** (+1 tap, circular progress, haptic feedback).
+            - ☀️ **Clean Modern Light Theme**: Apple/Material 3 style with slate & emerald accents.
             - 👤 **Custom User Name**: Personalized morning greetings ("Assalam-o-Alaikum, [Name] 👋").
             - ⚡ **3-Pillar Daily Inspiration**: 40+ Quranic Ayats, 40+ Sahih Ahadith, and 40+ Hard-hitting Grind & Comeback Motivation quotes.
-            - ⏰ **Smart Alarms & Wake-Up Check**: 5-minute anti-snooze verification & charging challenge.
+            - ⏰ **Smart Alarms**: 5-minute wake-up check & charging challenge.
 
-            📲 **Installation:**
-            Tap on **`wakemate-flutter-debug.apk`** below under **Assets** to download directly to your Android device and install!
+            📲 **Direct Download:**
+            Click on **`wakemate-flutter-debug.apk`** below under **Assets** to download directly to your phone and install!
           files: ./wakemate-flutter-debug.apk
           draft: false
           prerelease: false
@@ -91,5 +103,4 @@ jobs:
         if: steps.verify_flutter_apk.outputs.apk_exists != 'true'
         run: |
           echo "ERROR: Flutter APK was not produced."
-          cat wakemate_flutter/build_flutter.log | tail -n 50
           exit 1
