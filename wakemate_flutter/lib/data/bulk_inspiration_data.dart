@@ -1,0 +1,156 @@
+import '../models/alarm_item.dart';
+
+class BulkInspirationData {
+  static final List<InspirationItem> ayats = [
+    InspirationItem(
+      id: 'a1',
+      type: 'ayat',
+      title: 'Surah Ash-Sharh (94:5-6)',
+      arabicOrQuote: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا • إِنَّ مَعَ الْعُسْرِ يُسْرًا',
+      translationOrDetail: 'Beshak har mushkil ke sath aasani hai. Beshak har mushkil ke sath aasani hai.',
+      reference: 'Al-Quran 94:5-6',
+    ),
+    InspirationItem(
+      id: 'a2',
+      type: 'ayat',
+      title: 'Surah Al-Baqarah (2:286)',
+      arabicOrQuote: 'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',
+      translationOrDetail: 'Allah kisi jaan par uski taqat se zyada bojh nahi daalta.',
+      reference: 'Al-Quran 2:286',
+    ),
+    InspirationItem(
+      id: 'a3',
+      type: 'ayat',
+      title: 'Surah Az-Zumar (39:53)',
+      arabicOrQuote: 'لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ',
+      translationOrDetail: 'Allah ki rehmat se kabhi na-umeed mat hona.',
+      reference: 'Al-Quran 39:53',
+    ),
+    InspirationItem(
+      id: 'a4',
+      type: 'ayat',
+      title: 'Surah At-Talaq (65:3)',
+      arabicOrQuote: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',
+      translationOrDetail: 'Aur jo Allah par bharosa karta hai, Allah uske liye kaafi hai.',
+      reference: 'Al-Quran 65:3',
+    ),
+    InspirationItem(
+      id: 'a5',
+      type: 'ayat',
+      title: 'Surah Al-Imran (3:139)',
+      arabicOrQuote: 'وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ إِن كُنتُم مُّؤْمِنِينَ',
+      translationOrDetail: 'Himmat na haaro aur gham na karo, tum hi ghalib rahogay agar tum momin ho.',
+      reference: 'Al-Quran 3:139',
+    ),
+    InspirationItem(
+      id: 'a6',
+      type: 'ayat',
+      title: 'Surah Al-Ankabut (29:69)',
+      arabicOrQuote: 'وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا',
+      translationOrDetail: 'Aur jinhon ne hamari raah mein mehnat ki, hum unhein apne raastay zaroor dikhaen ge.',
+      reference: 'Al-Quran 29:69',
+    ),
+    InspirationItem(
+      id: 'a7',
+      type: 'ayat',
+      title: 'Surah An-Najm (53:39)',
+      arabicOrQuote: 'وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ',
+      translationOrDetail: 'Aur insaan ke liye wahi kuch hai jiski usne koshish ki.',
+      reference: 'Al-Quran 53:39',
+    ),
+    InspirationItem(
+      id: 'a8',
+      type: 'ayat',
+      title: 'Surah Ar-Ra’d (13:28)',
+      arabicOrQuote: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',
+      translationOrDetail: 'Khabardar! Allah ke zikr hi se dilon ko sukoon milta hai.',
+      reference: 'Al-Quran 13:28',
+    ),
+  ];
+
+  static final List<InspirationItem> hadees = [
+    InspirationItem(
+      id: 'h1',
+      type: 'hadees',
+      title: 'Amal aur Niyyat',
+      arabicOrQuote: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ',
+      translationOrDetail: 'Aamaal ka daromadar sirf niyyaton par hai.',
+      reference: 'Sahih Al-Bukhari 1',
+    ),
+    InspirationItem(
+      id: 'h2',
+      type: 'hadees',
+      title: 'Qawi Momin',
+      arabicOrQuote: 'الْمُؤْمِنُ الْقَوِيُّ خَيْرٌ وَأَحَبُّ إِلَى اللَّهِ مِنَ الْمُؤْمِنِ الضَّعِيفِ',
+      translationOrDetail: 'Taaqatwar momin, kamzor momin ke muqablay mein Allah ko zyada mehboob aur behtar hai.',
+      reference: 'Sahih Muslim 2664',
+    ),
+    InspirationItem(
+      id: 'h3',
+      type: 'hadees',
+      title: 'Subah ki Barkat',
+      arabicOrQuote: 'اللَّهُمَّ بَارِكْ لِأُمَّتِي فِي بُكُورِهَا',
+      translationOrDetail: 'Aye Allah! Meri ummat ke subah ke auqaat mein barkat ata farma.',
+      reference: 'Sunan Abi Dawud 2606',
+    ),
+    InspirationItem(
+      id: 'h4',
+      type: 'hadees',
+      title: 'Koshish aur Bharosa',
+      arabicOrQuote: 'احْرِصْ عَلَى مَا يَنْفَعُكَ، وَاسْتَعِنْ بِاللَّهِ وَلَا تَعْجِزْ',
+      translationOrDetail: 'Us cheez ki hirs karo jo tumhein faida de, Allah se madad maango aur himmat mat haaro.',
+      reference: 'Sahih Muslim 2664',
+    ),
+    InspirationItem(
+      id: 'h5',
+      type: 'hadees',
+      title: 'Asaan Banao',
+      arabicOrQuote: 'يَسِّرُوا وَلاَ تُعَسِّرُوا، وَبَشِّرُوا وَلاَ تُنَفِّرُوا',
+      translationOrDetail: 'Aasani paida karo, mushkil mat daalo; khushkhabri do aur nafrat na phailao.',
+      reference: 'Sahih Al-Bukhari 69',
+    ),
+  ];
+
+  static final List<InspirationItem> motivation = [
+    InspirationItem(
+      id: 'm1',
+      type: 'motivation',
+      title: 'Unstoppable Comeback',
+      arabicOrQuote: 'Agar kisi ne saath chhorha hai to rona nahi, aage barho aur itni mehnat karo ke unhe apni ghalti ka ehsaas ho!',
+      translationOrDetail: 'Log chhorh kar jaate hain taake tum apni asli taqat pehchan sako. Jab tum akelay larte ho, tab tum be-misaal bante ho.',
+      reference: 'Daily Grind & Resilience',
+    ),
+    InspirationItem(
+      id: 'm2',
+      type: 'motivation',
+      title: 'I CAN DO IT',
+      arabicOrQuote: 'I CAN DO IT. Meri kamyabi hi mera sab se bada jawab hogi.',
+      translationOrDetail: 'Kamyabi ka sab se behtareen intiqam be-misaal kamyabi hai. Lafzon se nahi, apne kaam se jawab do.',
+      reference: 'Self-Belief Rule',
+    ),
+    InspirationItem(
+      id: 'm3',
+      type: 'motivation',
+      title: 'Silence & Execution',
+      arabicOrQuote: 'Mehnat itni khamoshi se karo ke tumhari kamyabi shor macha de.',
+      translationOrDetail: 'Apne plans kisi ko mat batao. Apne goals chup chap chase karo aur result unke samne pesh karo.',
+      reference: 'Hustle Mindset',
+    ),
+    InspirationItem(
+      id: 'm4',
+      type: 'motivation',
+      title: 'Khara Ho Aur Shuru Kar',
+      arabicOrQuote: 'Jo log tumhein gira dekhna chahte the, unhein tumhari bulandi dekh kar hairan hona padega.',
+      translationOrDetail: 'Bistar chhorh, aalas pehnk, aur wo bano jo tum banna chahte the. Waqt kisi ka intezar nahi karta.',
+      reference: 'Morning Awakening',
+    ),
+    InspirationItem(
+      id: 'm5',
+      type: 'motivation',
+      title: 'Rab Ka Sath',
+      arabicOrQuote: 'Jab tak Allah tumhare sath hai, dunya ki koi taqat tumhein hara nahi sakti.',
+      translationOrDetail: 'Sajday mein ro kar maang aur maidaan mein sher ban kar larr. Kamyabi tumhare qadam choomay gi.',
+      reference: 'Faith & Action',
+    ),
+  ];
+}

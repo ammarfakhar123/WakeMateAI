@@ -1,0 +1,78 @@
+import '../models/zikr_item.dart';
+
+class DefaultAzkarData {
+  static final List<ZikrItem> defaultList = [
+    ZikrItem(
+      id: 'z1',
+      title: 'SubhanAllah (پاک ہے اللہ)',
+      arabic: 'سُبْحَانَ اللَّهِ',
+      urdu: 'Allah har aib aur nuqs se paak hai.',
+      targetCount: 33,
+      currentCount: 0,
+      isCustom: false,
+    ),
+    ZikrItem(
+      id: 'z2',
+      title: 'Alhamdulillah (تمام تعریفیں اللہ کے لیے)',
+      arabic: 'الْحَمْدُ لِلَّهِ',
+      urdu: 'Tamaam taareefein aur shukr sirf Allah Rabbul Izzat ke liye hain.',
+      targetCount: 33,
+      currentCount: 0,
+      isCustom: false,
+    ),
+    ZikrItem(
+      id: 'z3',
+      title: 'Allahu Akbar (اللہ سب سے بڑا ہے)',
+      arabic: 'اللَّهُ أَكْبَرُ',
+      urdu: 'Allah sab se bada aur aala o arfa hai.',
+      targetCount: 34,
+      currentCount: 0,
+      isCustom: false,
+    ),
+    ZikrItem(
+      id: 'z4',
+      title: 'Istighfar (توبہ و استغفار)',
+      arabic: 'أَسْتَغْفِرُ اللَّهَ رَبِّي مِنْ كُلِّ ذَنْبٍ وَأَتُوبُ إِلَيْهِ',
+      urdu: 'Main apne Rab Allah se tamaam gunahon ki maafi maangta hoon aur Usi ki taraf ruju karta hoon.',
+      targetCount: 100,
+      currentCount: 0,
+      isCustom: false,
+    ),
+    ZikrItem(
+      id: 'z5',
+      title: 'Kalima Tauheed (کلمہ توحید)',
+      arabic: 'لَا إِلٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+      urdu: 'Allah ke siwa koi mabood nahi, Wo akela hai, Uska koi shareek nahi, Badshahat aur taareef Usi ke liye hai aur Wo har cheez par qadir hai.',
+      targetCount: 100,
+      currentCount: 0,
+      isCustom: false,
+    ),
+    ZikrItem(
+      id: 'z6',
+      title: 'Durood Sharif (درود شریف)',
+      arabic: 'اللَّهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَعَلَىٰ آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ وَعَلَىٰ آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ',
+      urdu: 'Aye Allah! Rehmat naazil farma Hazrat Muhammad ﷺ par aur unki aal par...',
+      targetCount: 10,
+      currentCount: 0,
+      isCustom: false,
+    ),
+    ZikrItem(
+      id: 'z7',
+      title: 'Ayat-ul-Kursi (آیت الکرسی)',
+      arabic: 'اللَّهُ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ',
+      urdu: 'Allah, jiske siwa koi mabood nahi, Wo hamesha zinda aur qaim rehne wala hai...',
+      targetCount: 1,
+      currentCount: 0,
+      isCustom: false,
+    ),
+    ZikrItem(
+      id: 'z8',
+      title: 'Hasbunallah (کفایت و بھروسہ)',
+      arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
+      urdu: 'Hamein Allah kaafi hai aur Wo behtareen kaarsaaz hai.',
+      targetCount: 100,
+      currentCount: 0,
+      isCustom: false,
+    ),
+  ];
+}

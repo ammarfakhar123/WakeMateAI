@@ -1,0 +1,95 @@
+name: Build WakeMate AI Flutter APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-flutter:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Run Flutter Doctor
+        run: flutter doctor -v
+
+      - name: Get Flutter Packages
+        working-directory: ./wakemate_flutter
+        run: flutter pub get
+
+      - name: Build Debug APK
+        id: build_step
+        working-directory: ./wakemate_flutter
+        run: |
+          set -o pipefail
+          flutter build apk --debug 2>&1 | tee build_flutter.log
+
+      - name: Verify Flutter APK Output
+        id: verify_flutter_apk
+        run: |
+          if [ -f wakemate_flutter/build/app/outputs/flutter-apk/app-debug.apk ]; then
+            echo "apk_exists=true" >> $GITHUB_OUTPUT
+            echo "Successfully generated Flutter APK:"
+            ls -lh wakemate_flutter/build/app/outputs/flutter-apk/app-debug.apk
+            cp wakemate_flutter/build/app/outputs/flutter-apk/app-debug.apk ./wakemate-flutter-debug.apk
+          else
+            echo "apk_exists=false" >> $GITHUB_OUTPUT
+            echo "No Flutter APK found!"
+            find wakemate_flutter/build -name "*.apk" || true
+          fi
+
+      - name: Upload Artifact
+        if: steps.verify_flutter_apk.outputs.apk_exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wakemate-flutter-debug
+          path: ./wakemate-flutter-debug.apk
+
+      - name: Create GitHub Release with APK
+        if: steps.verify_flutter_apk.outputs.apk_exists == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v1.1.${{ github.run_number }}"
+          name: "WakeMate AI Flutter v1.1.${{ github.run_number }} (Direct APK)"
+          body: |
+            ### 🚀 WakeMate AI - Flutter Cross-Platform Release (v1.1.${{ github.run_number }})
+
+            ✨ **Key Features in this update:**
+            - 💰 **Personal Finance Manager**: Track Income & Expenses with auto PKR Rs. Net Balance calculation and categorized history.
+            - 📖 **Daily Azkar & Custom Arabic Paste**: Dedicated RTL Arabic text area to paste any custom Dua/Ayat from your clipboard with interactive **Digital Tasbeeh Counter** (+1 tap, circular progress, haptic feedback).
+            - ☀️ **Clean Modern Light Theme**: High-contrast Apple/Material 3 style with slate & emerald tones.
+            - 👤 **Custom User Name**: Personalized morning greetings ("Assalam-o-Alaikum, [Name] 👋").
+            - ⚡ **3-Pillar Daily Inspiration**: 40+ Quranic Ayats, 40+ Sahih Ahadith, and 40+ Hard-hitting Grind & Comeback Motivation quotes.
+            - ⏰ **Smart Alarms & Wake-Up Check**: 5-minute anti-snooze verification & charging challenge.
+
+            📲 **Installation:**
+            Tap on **`wakemate-flutter-debug.apk`** below under **Assets** to download directly to your Android device and install!
+          files: ./wakemate-flutter-debug.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail If APK Missing
+        if: steps.verify_flutter_apk.outputs.apk_exists != 'true'
+        run: |
+          echo "ERROR: Flutter APK was not produced."
+          cat wakemate_flutter/build_flutter.log | tail -n 50
+          exit 1
